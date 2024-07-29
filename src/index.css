@@ -13,6 +13,13 @@ body,
 .app {
   display: flex;
   position: relative;
+  overflow: hidden; /* Ensure .app does not scroll */
+}
+
+.content {
+  flex: 1; /* Allow content to take remaining space */
+  overflow: auto; /* Enable scrolling if content overflows */
+  height: calc(100vh - 0px); /* Adjust height as needed */
 }
 
 ::-webkit-scrollbar {

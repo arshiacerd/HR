@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
@@ -10,19 +10,25 @@ import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import AccessAlarmsIcon from "@mui/icons-material/AccessAlarms";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import TaskIcon from "@mui/icons-material/Task";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import PaymentsIcon from "@mui/icons-material/Payments";
-import PaymentIcon from "@mui/icons-material/Payment";
-import AddTaskIcon from "@mui/icons-material/AddTask";
-import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
-import FeedbackIcon from "@mui/icons-material/Feedback";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
+import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
+import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import PaymentIcon from '@mui/icons-material/Payment';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import TextsmsIcon from '@mui/icons-material/Textsms';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
+import HolidayVillageIcon from '@mui/icons-material/HolidayVillage';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TaskIcon from '@mui/icons-material/Task';
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -45,12 +51,32 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 const Sidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(!isMobile);
   const [selected, setSelected] = useState("Dashboard");
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
-  return (
+  useEffect(() => {
+    setIsSidebarVisible(!isMobile);
+  }, [isMobile]);
+
+  return  (
     <Box display="flex" height="100vh">
+      {isMobile && (
+        <IconButton
+          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+          sx={{
+            position: "fixed",
+            top: 10,
+            left: 10,
+            zIndex: 1300,
+            color: colors.grey[100],
+          }}
+        >
+          <MenuOutlinedIcon />
+        </IconButton>
+      )}
+
       <Box
         sx={{
           "& .pro-sidebar-inner": {
@@ -68,41 +94,44 @@ const Sidebar = () => {
           "& .pro-menu-item.active": {
             color: "#6870fa !important",
           },
-          display: { xs: isSidebarVisible ? "block" : "none", md: "flex" },
+          display: isSidebarVisible ? "flex" : "none",
           flexDirection: "column",
           overflowY: "auto",
           height: "100vh",
-          zIndex: { xs: 1300, md: "auto" }, // ensures the sidebar appears above the content on mobile
-          position: { xs: "absolute", md: "relative" },
-          width: { xs: "100%", md: "auto" },
+          zIndex: 1200,
+          position: isMobile ? "fixed" : "relative",
+          width: isCollapsed ? "80px" : "300px", // Adjust width for PC
+          transition: "width 0.3s", // Smooth transition when collapsing
         }}
       >
         <ProSidebar collapsed={isCollapsed}>
           <Menu iconShape="square">
-            <MenuItem
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
-              style={{
-                margin: "10px 0 20px 0",
-                color: colors.grey[100],
-              }}
-            >
-              {!isCollapsed && (
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  ml="15px"
-                >
-                  <Typography variant="h3" color={colors.grey[100]}>
-                    ABIDI PRO
-                  </Typography>
-                  <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                    <MenuOutlinedIcon />
-                  </IconButton>
-                </Box>
-              )}
-            </MenuItem>
+            {!isMobile && (
+              <MenuItem
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
+                style={{
+                  margin: "10px 0 20px 0",
+                  color: colors.grey[100],
+                }}
+              >
+                {!isCollapsed && (
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    ml="15px"
+                  >
+                    <Typography variant="h3" color={colors.grey[100]}>
+                      ABIDI PRO
+                    </Typography>
+                    <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
+                      <MenuOutlinedIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </MenuItem>
+            )}
 
             {!isCollapsed && (
               <Box mb="25px">
@@ -247,6 +276,7 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
+
               <Item
                 title="Salary Calculation"
                 to="/earninganddeductions"
@@ -304,25 +334,36 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
+              <Typography
+                variant="h6"
+                color={colors.grey[300]}
+                sx={{ m: "15px 0 5px 20px" }}
+              >
+                Messages
+              </Typography>
+              <Item
+                title="Chat "
+                to="/chat"
+                icon={<TextsmsIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
             </Box>
           </Menu>
         </ProSidebar>
       </Box>
-      <Box flexGrow={1} height="100vh" overflow="auto">
+      <Box
+        // sx={{
+        //   flexGrow: 1,
+        //   ml: isSidebarVisible && !isMobile ? (isCollapsed ? "80px" : "100px") : "0",
+        //   transition: "margin-left 0.3s",
+        //   height: "100vh",
+        //   overflow: "auto",
+        //   padding: "20px",
+        // }}
+      >
         {/* Main content goes here */}
       </Box>
-      <IconButton
-        onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-        sx={{
-          position: "fixed",
-          bottom: "16px",
-          right: "16px",
-          zIndex: 1300,
-          display: { md: "none" },
-        }}
-      >
-        <MenuOutlinedIcon />
-      </IconButton>
     </Box>
   );
 };
