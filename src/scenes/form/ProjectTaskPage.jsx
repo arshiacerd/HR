@@ -26,7 +26,7 @@ const ProjectTaskPage = () => {
   useEffect(() => {
     const getAllUsers = async () => {
       try {
-        const allUsers = await axios.get("https://murtazamahm018-backend.mdbgo.io/api/users/names");
+        const allUsers = await axios.get("https://murtazamahm007-abidipro.mdbgo.io/api/users/names");
         setUsers(allUsers.data);
       } catch (e) {
         console.log(e);
@@ -126,13 +126,13 @@ const ProjectTaskPage = () => {
     try {
       if (editingIndex !== null) {
         const projectId = projects[editingIndex]._id;
-        await axios.put(`https://murtazamahm018-backend.mdbgo.io/api/assign-tasks/`, formData);
+        await axios.put(`https://murtazamahm007-abidipro.mdbgo.io/api/assign-tasks/`, formData);
         const updatedProjects = [...projects];
         updatedProjects[editingIndex] = { ...formData, _id: projectId };
         setProjects(updatedProjects);
         toast.success("Task updated successfully");
       } else {
-        const response = await axios.post("https://murtazamahm018-backend.mdbgo.io/api/assign-tasks", formData);
+        const response = await axios.post("https://murtazamahm007-abidipro.mdbgo.io/api/assign-tasks", formData);
         setProjects([...projects, { ...formData, _id: response.data.project._id }]);
         toast.success("Task added successfully");
       }
@@ -171,9 +171,9 @@ const ProjectTaskPage = () => {
       textDescription: taskDesc,
     };
     try {
-      await axios.post("https://murtazamahm018-backend.mdbgo.io/api/create-tasks", formData);
+      await axios.post("https://murtazamahm007-abidipro.mdbgo.io/api/create-tasks", formData);
       alert("Task Assigned Successfully");
-      await axios.get("https://murtazamahm018-backend.mdbgo.io/api/task/mail", {
+      await axios.get("https://murtazamahm007-abidipro.mdbgo.io/api/task/mail", {
         params: {
           personalEmail: localStorage.getItem("email"),
           textDescription: formData.textDescription,

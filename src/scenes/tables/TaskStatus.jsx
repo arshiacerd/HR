@@ -21,7 +21,7 @@ const TaskStatus = () => {
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/create-tasks', {
+      const response = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/create-tasks', {
         params: { name: localStorage.getItem("name") },
       });
       setProjects(response.data);
@@ -37,7 +37,7 @@ const TaskStatus = () => {
 
   const handleDeleteClick = async (id) => {
     try {
-      await axios.delete(`https://murtazamahm018-backend.mdbgo.io/api/deleteTask`, { params: { _id: id } });
+      await axios.delete(`https://murtazamahm007-abidipro.mdbgo.io/api/deleteTask`, { params: { _id: id } });
       setReFetch(!reFetch);
     } catch (error) {
       toast.error("Failed to delete task");
@@ -61,10 +61,10 @@ const TaskStatus = () => {
 
     try {
       if (editingProject) {
-        await axios.put(`https://murtazamahm018-backend.mdbgo.io/api/assigned-tasks/${editingProject._id}`, formData);
+        await axios.put(`https://murtazamahm007-abidipro.mdbgo.io/api/assigned-tasks/${editingProject._id}`, formData);
         toast.success("Task updated successfully");
       } else {
-        await axios.post('https://murtazamahm018-backend.mdbgo.io/api/assigned-tasks', formData);
+        await axios.post('https://murtazamahm007-abidipro.mdbgo.io/api/assigned-tasks', formData);
         toast.success("Task created successfully");
       }
       fetchTasks();

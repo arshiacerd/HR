@@ -18,7 +18,7 @@ const Team = () => {
   useEffect(() => {
     const fetchTeamData = async () => {
       try {
-        const response = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/getUser');
+        const response = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/getUser');
         setTeamData(response.data);
       } catch (error) {
         console.error('Error fetching team data', error);
@@ -38,7 +38,7 @@ const Team = () => {
       alert("Please select a user first!");
     } else {
       try {
-        const response = await axios.delete(`https://murtazamahm018-backend.mdbgo.io/api/deleteUser/${selectedUser._id}`);
+        const response = await axios.delete(`https://murtazamahm007-abidipro.mdbgo.io/api/deleteUser/${selectedUser._id}`);
         if (response.status === 200) {
           setTeamData(teamData.filter((item) => item._id !== selectedUser._id));
           setSelectedUser(null);
@@ -54,14 +54,14 @@ const Team = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`https://murtazamahm018-backend.mdbgo.io/api/updateUser/${selectedUser._id}`, {
+      await axios.put(`https://murtazamahm007-abidipro.mdbgo.io/api/updateUser/${selectedUser._id}`, {
         name: e.target.name.value,
         designation: e.target.designation.value,
         status: e.target.status.value,
         personalEmail: e.target.personalEmail.value,
         reportTo: e.target.reportTo.value,
       });
-      const updatedData = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/getUser');
+      const updatedData = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/getUser');
       setTeamData(updatedData.data);
       setPopupOpen(false);
       setSelectedUser(null);

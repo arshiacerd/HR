@@ -26,7 +26,7 @@ const EarningAndDeductions = () => {
 
   const fetchEmployees = async () => {
     try {
-      const employees = await axios.get("https://murtazamahm018-backend.mdbgo.io/api/EmployeesPayroll");
+      const employees = await axios.get("https://murtazamahm007-abidipro.mdbgo.io/api/EmployeesPayroll");
       setProjects(employees.data);
     } catch (err) {
       console.log(err);

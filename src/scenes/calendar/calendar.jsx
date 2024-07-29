@@ -21,7 +21,7 @@ const Calendar = () => {
 
   const getEntries = async () => {
     try {
-      const res = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/timeEntries', {
+      const res = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/timeEntries', {
         params: {
           email: localStorage.getItem('email')
         }

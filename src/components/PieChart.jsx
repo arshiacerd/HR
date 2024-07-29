@@ -12,7 +12,7 @@ const PieChart = () => {
   useEffect(() => {
     const fetchTeamData = async () => {
       try {
-        const response = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/getUser');
+        const response = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/getUser');
         setTeamData(response.data); // Assuming response.data is an array of objects with designation information
       } catch (error) {
         console.error('Error fetching team data', error);

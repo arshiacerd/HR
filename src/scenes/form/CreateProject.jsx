@@ -17,7 +17,7 @@ const CreateProject = () => {
   useEffect(() => {
     const getAllUsers = async () => {
       try {
-        const { data } = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/getUser');
+        const { data } = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/getUser');
         const userNames = data.map(user => user.name); // Extract only names
         setUsers(userNames);
       } catch (error) {
@@ -39,10 +39,10 @@ const CreateProject = () => {
 
     try {
       if (values._id) {
-        await axios.put(`https://murtazamahm018-backend.mdbgo.io/api/projects/${values._id}`, formData);
+        await axios.put(`https://murtazamahm007-abidipro.mdbgo.io/api/projects/${values._id}`, formData);
         toast.success('Project updated successfully');
       } else {
-        await axios.post('https://murtazamahm018-backend.mdbgo.io/api/projects', formData);
+        await axios.post('https://murtazamahm007-abidipro.mdbgo.io/api/projects', formData);
         toast.success('Project added successfully');
       }
     } catch (error) {

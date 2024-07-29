@@ -17,7 +17,7 @@ const ViewOne = () => {
 
   const fetchInvoice = async () => {
     try {
-      const response = await axios.get(`https://murtazamahm018-backend.mdbgo.io/api/viewOne-invoices/`, { params: { _id: id } });
+      const response = await axios.get(`https://murtazamahm007-abidipro.mdbgo.io/api/viewOne-invoices/`, { params: { _id: id } });
       setInvoice(response.data[0]);
     } catch (error) {
       console.error("Error fetching invoice:", error);

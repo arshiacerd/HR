@@ -13,7 +13,7 @@ const AllDoc = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/documents');
+      const response = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/documents');
       console.log(response.data);
       setDocuments(response.data);
     } catch (error) {
@@ -73,7 +73,7 @@ const AllDoc = () => {
               columns={columns}
               pageSize={5}
               rowsPerPageOptions={[5, 10]}
-              onRowClick={(params) => window.open(`https://murtazamahm018-backend.mdbgo.io/${params.row.path}`, '_blank')}
+              onRowClick={(params) => window.open(`https://murtazamahm007-abidipro.mdbgo.io/${params.row.path}`, '_blank')}
             />
           </Box>
         </Box>

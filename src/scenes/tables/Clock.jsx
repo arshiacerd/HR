@@ -52,7 +52,7 @@ const Clock = () => {
         totalTime: formatTime(totalTime),
         email: localStorage.getItem('email')
       };
-      axios.post("https://murtazamahm018-backend.mdbgo.io/api/timeEntries", newEntry)
+      axios.post("https://murtazamahm007-abidipro.mdbgo.io/api/timeEntries", newEntry)
         .then((res) => {
           console.log(res);
           window.location.reload();

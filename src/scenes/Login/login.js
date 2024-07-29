@@ -19,12 +19,12 @@ const Login = () => {
         event.preventDefault();
         setError(''); // Reset error message
         try {
-            const response = await axios.post('https://murtazamahm018-backend.mdbgo.io/api/users/login', { email, password });
+            const response = await axios.post('https://murtazamahm007-abidipro.mdbgo.io/api/users/login', { email, password });
             console.log(response.data.message);
             localStorage.setItem('userId', response.data.userId);
             localStorage.setItem('email', response.data.email);
             
-            const name = await axios.get('https://murtazamahm018-backend.mdbgo.io/api/getName', { params: { email: email } });
+            const name = await axios.get('https://murtazamahm007-abidipro.mdbgo.io/api/getName', { params: { email: email } });
             localStorage.setItem('name', name.data);
             let currentUser = localStorage.getItem('email');
             // toast.success(Welcome ${currentUser});

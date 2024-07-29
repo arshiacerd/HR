@@ -10,25 +10,19 @@ import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
-import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
-import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
+import AccessAlarmsIcon from "@mui/icons-material/AccessAlarms";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import TaskIcon from "@mui/icons-material/Task";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import PaymentsIcon from "@mui/icons-material/Payments";
+import PaymentIcon from "@mui/icons-material/Payment";
+import AddTaskIcon from "@mui/icons-material/AddTask";
+import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
+import FeedbackIcon from "@mui/icons-material/Feedback";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import AddTaskIcon from '@mui/icons-material/AddTask';
-import PaymentIcon from '@mui/icons-material/Payment';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import NoteAddIcon from '@mui/icons-material/NoteAdd';
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import TextsmsIcon from '@mui/icons-material/Textsms';
-import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
-import PaymentsIcon from '@mui/icons-material/Payments';
-import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
-import HolidayVillageIcon from '@mui/icons-material/HolidayVillage';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import TaskIcon from '@mui/icons-material/Task';
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -53,12 +47,10 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   return (
-    <Box
-      display="flex"
-      height="100vh"
-    >
+    <Box display="flex" height="100vh">
       <Box
         sx={{
           "& .pro-sidebar-inner": {
@@ -76,15 +68,17 @@ const Sidebar = () => {
           "& .pro-menu-item.active": {
             color: "#6870fa !important",
           },
-          display: "flex",
+          display: { xs: isSidebarVisible ? "block" : "none", md: "flex" },
           flexDirection: "column",
           overflowY: "auto",
           height: "100vh",
+          zIndex: { xs: 1300, md: "auto" }, // ensures the sidebar appears above the content on mobile
+          position: { xs: "absolute", md: "relative" },
+          width: { xs: "100%", md: "auto" },
         }}
       >
         <ProSidebar collapsed={isCollapsed}>
           <Menu iconShape="square">
-            {/* LOGO AND MENU ICON */}
             <MenuItem
               onClick={() => setIsCollapsed(!isCollapsed)}
               icon={isCollapsed ? <MenuOutlinedIcon /> : undefined}
@@ -253,7 +247,6 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-
               <Item
                 title="Salary Calculation"
                 to="/earninganddeductions"
@@ -304,31 +297,32 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-                  <Item
+              <Item
                 title="Feedbacks"
                 to="/feedback"
                 icon={<FeedbackIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
-              <Typography
-                variant="h6"
-                color={colors.grey[300]}
-                sx={{ m: "15px 0 5px 20px" }}
-              >
-                </Typography>
-       
             </Box>
           </Menu>
         </ProSidebar>
       </Box>
-      <Box
-        flexGrow={1}
-        height="100vh"
-        overflow="auto"
-      >
+      <Box flexGrow={1} height="100vh" overflow="auto">
         {/* Main content goes here */}
       </Box>
+      <IconButton
+        onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+        sx={{
+          position: "fixed",
+          bottom: "16px",
+          right: "16px",
+          zIndex: 1300,
+          display: { md: "none" },
+        }}
+      >
+        <MenuOutlinedIcon />
+      </IconButton>
     </Box>
   );
 };
