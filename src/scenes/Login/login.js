@@ -30,8 +30,12 @@ const Login = () => {
             // toast.success(Welcome ${currentUser});
             
             // Redirect to personal page after successful login
+            console.log("I am in try!")
             navigate('/dashboard');
         } catch (error) {
+            console.log("I am in catch!")
+            console.error("Error details:", error);
+
             if (error.response) {
                 // The request was made and the server responded with a status code
                 setError(error.response.data.error || 'Invalid login credentials');

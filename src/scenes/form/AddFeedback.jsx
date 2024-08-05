@@ -1,119 +1,210 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Sentiment from 'sentiment';
-import { jsPDF } from 'jspdf';
-import { Box, Button, TextField, Select, MenuItem, InputLabel, FormControl, FormHelperText } from "@mui/material";
-import { Formik } from "formik";
+import { Bar, Pie } from 'react-chartjs-2';
+import { Box, Button, TextField, useMediaQuery } from "@mui/material";
+import { Formik, Form, Field } from "formik";
 import * as yup from "yup";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
-
+import jsPDF from 'jspdf';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import './Feedback.css'; // Import the CSS file
+ 
+// Register Chart.js components
+ChartJS.register(
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+ 
+// Define initial values and validation schema
+const initialValues = {
+  subject: '',
+  feedback: '',
+};
+ 
+const feedbackSchema = yup.object().shape({
+  subject: yup.string().required('Subject is required'),
+  feedback: yup.string().min(10, 'Feedback must be at least 10 characters long').required('Required'),
+});
+ 
 const Feedback = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
-  const [feedback, setFeedback] = useState('');
-  const [subject, setSubject] = useState('Feedback for Graphics Team');
-  const [otherSubject, setOtherSubject] = useState('');
-  const [name, setName] = useState('');
-  const [sentiment, setSentiment] = useState('');
-  const [sentimentScore, setSentimentScore] = useState(0);
-  const [keywords, setKeywords] = useState([]);
   const [feedbackHistory, setFeedbackHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
+ 
+  const sentimentChartRef = useRef(null);
+  const subcategoriesChartRef = useRef(null);
+ 
+  const MIN_FEEDBACK_LENGTH = 10;
+ 
   useEffect(() => {
-    const storedName = localStorage.getItem('name');
-    if (storedName) {
-      setName(storedName);
-    }
     const storedHistory = JSON.parse(localStorage.getItem('feedbackHistory')) || [];
     setFeedbackHistory(storedHistory);
   }, []);
-
+ 
   const analyzeSentiment = (text) => {
     const sentimentAnalyzer = new Sentiment();
     const result = sentimentAnalyzer.analyze(text);
-    setSentimentScore(result.score);
     if (result.score > 0) return 'Positive';
     if (result.score < 0) return 'Negative';
     return 'Neutral';
   };
-
-  const extractKeywords = (text) => {
-    const stopWords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now'];
-    const words = text.toLowerCase().split(/\s+/).filter(word => !stopWords.includes(word));
-    const wordCount = words.reduce((count, word) => {
-      count[word] = (count[word] || 0) + 1;
-      return count;
-    }, {});
-    return Object.keys(wordCount).sort((a, b) => wordCount[b] - wordCount[a]).slice(0, 5);
-  };
-
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.text(`Feedback History`, 10, 10);
-    feedbackHistory.forEach((item, index) => {
-      const yPos = 20 + index * 40;
-      doc.text(`Feedback ${index + 1}:`, 10, yPos);
-      doc.text(`Name: ${item.name}`, 20, yPos + 10);
-      doc.text(`Feedback: ${item.feedback}`, 20, yPos + 20);
-      doc.text(`Sentiment: ${item.sentiment} (Score: ${item.sentimentScore})`, 20, yPos + 30);
-    });
-    doc.save('feedback_history.pdf');
-  };
-
-  const handleSubmit = async (values) => {
-    setErrorMessage('');
-
-    const feedbackSentiment = analyzeSentiment(feedback);
-    const feedbackKeywords = extractKeywords(feedback);
-    setSentiment(feedbackSentiment);
-    setKeywords(feedbackKeywords);
-
-    const actualSubject = subject === 'Other' ? otherSubject : subject;
-    console.log('Subject being sent:', actualSubject);
-
-    const payload = {
-      subject: actualSubject,
-      feedback,
-      name: values.name,
-      sentiment: feedbackSentiment,
-      sentimentScore,
-      keywords: feedbackKeywords
+ 
+  const categorizeFeedback = (text) => {
+    const categories = {
+      UI: ['ui', 'interface', 'design', 'layout'],
+      Functionality: ['functionality', 'feature', 'bug', 'error'],
+      Management: ['management', 'admin', 'leadership'],
+      'Employee Behavior': ['employee', 'staff', 'service', 'behavior']
     };
-
-    console.log('Sending payload:', payload);
-
+ 
+    for (const category in categories) {
+      for (const keyword of categories[category]) {
+        if (text.toLowerCase().includes(keyword)) {
+          return category;
+        }
+      }
+    }
+    return 'General';
+  };
+ 
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    setErrorMessage('');
+ 
+    if (values.feedback.length < MIN_FEEDBACK_LENGTH) {
+      setErrorMessage(`Feedback must be at least ${MIN_FEEDBACK_LENGTH} characters long.`);
+      setSubmitting(false);
+      return;
+    }
+ 
+    const feedbackSentiment = analyzeSentiment(values.feedback);
+    const feedbackCategory = categorizeFeedback(values.feedback);
+ 
+    const payload = {
+      subject: values.subject,
+      feedback: values.feedback,
+      sentiment: feedbackSentiment,
+      sentimentScore: feedbackSentiment === 'Positive' ? 1 : (feedbackSentiment === 'Negative' ? -1 : 0),
+      category: feedbackCategory
+    };
+ 
     try {
-      const response = await axios.post('https://murtazamahm007-abidipro.mdbgo.io/api/feedback', payload, {
+      console.log("Submitting feedback:", payload); // Log payload
+      const response = await axios.post('http://localhost:3000/api/feedback', payload, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-
-      console.log('Full response:', response);
-      console.log('Feedback submitted:', response.data);
+ 
+      console.log("Response from server:", response); // Log response
       alert('Feedback submitted successfully');
-
+ 
       const newFeedback = { ...payload };
       const updatedHistory = [...feedbackHistory, newFeedback];
       setFeedbackHistory(updatedHistory);
       localStorage.setItem('feedbackHistory', JSON.stringify(updatedHistory));
-
-      setFeedback('');
-      setSubject('Feedback for Graphics Team'); // Reset subject to default
-      setOtherSubject(''); // Reset other subject
+ 
+      resetForm();
     } catch (error) {
+      console.error("Error submitting feedback:", error.response ? error.response.data : error.message); // Log detailed error
       if (error.response) {
-        console.error('Error response:', error.response.status, error.response.data);
-        setErrorMessage(`Error ${error.response.status}: ${error.response.data}`);
+        setErrorMessage(`Error ${error.response.status}: ${JSON.stringify(error.response.data)}`);
       } else {
-        console.error('Error:', error.message);
         setErrorMessage(`Error: ${error.message}`);
       }
+    } finally {
+      setSubmitting(false);
     }
   };
-
+ 
+  const clearAllHistory = () => {
+    setFeedbackHistory([]);
+    localStorage.removeItem('feedbackHistory');
+  };
+ 
+  const downloadFeedbackHistory = () => {
+    const doc = new jsPDF();
+    let yOffset = 10;
+ 
+    feedbackHistory.forEach((item, index) => {
+      doc.text(`Feedback ${index + 1}`, 10, yOffset);
+      doc.text(`Subject: ${item.subject}`, 10, yOffset + 10);
+      doc.text(`Feedback: ${item.feedback}`, 10, yOffset + 20);
+      doc.text(`Sentiment: ${item.sentiment} (Score: ${item.sentimentScore})`, 10, yOffset + 30);
+      yOffset += 40;
+ 
+      if (yOffset > 270) { // Move to the next page if content overflows
+        doc.addPage();
+        yOffset = 10;
+      }
+    });
+ 
+    doc.save('feedback_history.pdf');
+  };
+ 
+  const sentimentData = {
+    labels: ['Positive', 'Neutral', 'Negative'],
+    datasets: [{
+      data: [
+        feedbackHistory.filter(f => f.sentiment === 'Positive').length,
+        feedbackHistory.filter(f => f.sentiment === 'Neutral').length,
+        feedbackHistory.filter(f => f.sentiment === 'Negative').length,
+      ],
+      backgroundColor: ['#4caf50', '#ffeb3b', '#f44336'],
+    }]
+  };
+ 
+  const categorizedData = {
+    labels: ['UI', 'Functionality', 'Management', 'Employee Behavior'],
+    datasets: [
+      {
+        label: 'Positive',
+        data: [
+          feedbackHistory.filter(f => f.sentiment === 'Positive' && f.category === 'UI').length,
+          feedbackHistory.filter(f => f.sentiment === 'Positive' && f.category === 'Functionality').length,
+          feedbackHistory.filter(f => f.sentiment === 'Positive' && f.category === 'Management').length,
+          feedbackHistory.filter(f => f.sentiment === 'Positive' && f.category === 'Employee Behavior').length,
+        ],
+        backgroundColor: '#4caf50',
+      },
+      {
+        label: 'Neutral',
+        data: [
+          feedbackHistory.filter(f => f.sentiment === 'Neutral' && f.category === 'UI').length,
+          feedbackHistory.filter(f => f.sentiment === 'Neutral' && f.category === 'Functionality').length,
+          feedbackHistory.filter(f => f.sentiment === 'Neutral' && f.category === 'Management').length,
+          feedbackHistory.filter(f => f.sentiment === 'Neutral' && f.category === 'Employee Behavior').length,
+        ],
+        backgroundColor: '#ffeb3b',
+      },
+      {
+        label: 'Negative',
+        data: [
+          feedbackHistory.filter(f => f.sentiment === 'Negative' && f.category === 'UI').length,
+          feedbackHistory.filter(f => f.sentiment === 'Negative' && f.category === 'Functionality').length,
+          feedbackHistory.filter(f => f.sentiment === 'Negative' && f.category === 'Management').length,
+          feedbackHistory.filter(f => f.sentiment === 'Negative' && f.category === 'Employee Behavior').length,
+        ],
+        backgroundColor: '#f44336',
+      }
+    ]
+  };
+ 
   return (
     <Box m="20px">
       <Header title="FEEDBACK" subtitle="Provide your valuable feedback" />
@@ -122,15 +213,8 @@ const Feedback = () => {
         initialValues={initialValues}
         validationSchema={feedbackSchema}
       >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleChange,
-          handleSubmit,
-        }) => (
-          <form onSubmit={handleSubmit}>
+        {({ values, errors, touched, handleBlur, handleChange, handleSubmit, isSubmitting }) => (
+          <Form onSubmit={handleSubmit}>
             <Box
               display="grid"
               gap="20px"
@@ -139,68 +223,50 @@ const Feedback = () => {
                 "& > div": { gridColumn: isNonMobile ? undefined : "span 12" },
               }}
             >
-              <TextField
+              <Field
+                as={TextField}
                 fullWidth
-                variant="filled"
+                variant="outlined"
                 type="text"
-                label="Name"
+                label="Subject"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                value={values.name}
-                name="name"
-                error={!!touched.name && !!errors.name}
-                helperText={touched.name && errors.name}
-                sx={{ gridColumn: "span 6" }}
+                value={values.subject}
+                name="subject"
+                error={!!touched.subject && !!errors.subject}
+                helperText={touched.subject && errors.subject}
+                sx={{ gridColumn: "span 12" }}
               />
-              <FormControl fullWidth variant="filled" sx={{ gridColumn: "span 6" }}>
-                <InputLabel>Feedback Subject</InputLabel>
-                <Select
-                  label="Subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  required
-                >
-                  <MenuItem value="Feedback for Graphics Team">Feedback for Graphics Team</MenuItem>
-                  <MenuItem value="Feedback for Developers Team">Feedback for Developers Team</MenuItem>
-                  <MenuItem value="Feedback for Management">Feedback for Management</MenuItem>
-                  <MenuItem value="Feedback for Employees">Feedback for Employees</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
-                </Select>
-                {subject === 'Other' && (
-                  <TextField
-                    type="text"
-                    value={otherSubject}
-                    onChange={(e) => setOtherSubject(e.target.value)}
-                    placeholder="Please specify"
-                    required
-                    sx={{ marginTop: "10px" }}
-                  />
-                )}
-              </FormControl>
-              <TextField
+              <Field
+                as={TextField}
                 fullWidth
-                variant="filled"
+                variant="outlined"
+                multiline
+                rows={4}
                 type="text"
                 label="Feedback"
                 onBlur={handleBlur}
-                onChange={(e) => setFeedback(e.target.value)}
-                value={feedback}
+                onChange={handleChange}
+                value={values.feedback}
                 name="feedback"
                 error={!!touched.feedback && !!errors.feedback}
                 helperText={touched.feedback && errors.feedback}
                 sx={{ gridColumn: "span 12" }}
+                inputProps={{ minLength: MIN_FEEDBACK_LENGTH }}
               />
             </Box>
             <Box display="flex" justifyContent="flex-end" mt="20px">
-              <Button type="submit" color="primary" variant="contained">
+              <Button type="submit" color="primary" variant="contained" sx={{ backgroundColor: '#007BFF' }} disabled={isSubmitting}>
                 Submit Feedback
               </Button>
             </Box>
-          </form>
+          </Form>
         )}
       </Formik>
       {errorMessage && <p className="error-message">{errorMessage}</p>}
-      <Button onClick={() => setShowHistory(!showHistory)} sx={{ mt: 2 }}>
+      <Button
+        onClick={() => setShowHistory(!showHistory)}
+        sx={{ mt: 2, backgroundColor: showHistory ? '#f50057' : '#4caf50', color: '#ffffff', '&:hover': { backgroundColor: showHistory ? '#c51162' : '#388e3c' } }}>
         {showHistory ? 'Hide Feedback History' : 'Show Feedback History'}
       </Button>
       {showHistory && (
@@ -208,30 +274,66 @@ const Feedback = () => {
           <ul>
             {feedbackHistory.map((item, index) => (
               <li key={index}>
-                <p>Name: {item.name}</p>
+                <p>Subject: {item.subject}</p>
                 <p>Feedback: {item.feedback}</p>
                 <p>Sentiment: {item.sentiment} (Score: {item.sentimentScore})</p>
-                <p>Keywords: {item.keywords.join(', ')}</p>
               </li>
             ))}
           </ul>
-          <Button onClick={generatePDF} variant="contained" color="secondary">
+          <Button onClick={clearAllHistory} variant="contained" color="error" sx={{ mt: 2 }}>
+            Clear All History
+          </Button>
+          <Button onClick={downloadFeedbackHistory} variant="contained" color="primary" sx={{ mt: 2, ml: 2 }}>
             Download Feedback History
           </Button>
         </Box>
       )}
+      <div className='Char-size'>
+          <div className="chart-container" ref={sentimentChartRef}>
+          <h4>Sentiment Distribution</h4>
+            <Pie
+              data={sentimentData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                },
+                layout: {
+                  padding: {
+                    top: 10,
+                    bottom: 10,
+                  },
+                },
+              }}
+            />
+          </div>
+          <div className="chart-container" ref={subcategoriesChartRef}>
+          <h4>Subcategories Distribution</h4>
+            <Bar
+              data={categorizedData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                },
+                layout: {
+                  padding: {
+                    top: 10,
+                    bottom: 10,
+                  },
+                },
+              }}
+            />
+          </div>
+      </div>
     </Box>
   );
 };
-
-const initialValues = {
-  name: '',
-  feedback: '',
-};
-
-const feedbackSchema = yup.object().shape({
-  name: yup.string().required('Required'),
-  feedback: yup.string().required('Required'),
-});
-
+ 
 export default Feedback;

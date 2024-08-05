@@ -27,6 +27,7 @@ const ProjectTaskPage = () => {
     const getAllUsers = async () => {
       try {
         const allUsers = await axios.get("https://murtazamahm007-abidipro.mdbgo.io/api/users/names");
+        console.log("allUsers",allUsers )
         setUsers(allUsers.data);
       } catch (e) {
         console.log(e);

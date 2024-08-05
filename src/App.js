@@ -37,6 +37,9 @@ import ProjectTaskPage from "./scenes/form/ProjectTaskPage";
 import TaskStatus from "./scenes/tables/TaskStatus";
 import MyTasks from "./scenes/tables/MyTasks";
 import TimeoffApp from "./scenes/tables/TimeOffApp";
+import Test from "./components/Test";
+import LineChartParent from "./components/LineChartParent";
+import LineChart from "./components/LineChart";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -87,6 +90,9 @@ function App() {
               <Route path="/faq" element={<FAQ />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/geography" element={<Geography />} />
+              <Route path="/check" element={ <Test />} />
+              <Route path="/line" element={<LineChart />} />
+
             </Routes>
           </main>
         </div>
